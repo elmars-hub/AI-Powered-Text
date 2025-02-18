@@ -17,40 +17,26 @@ function App() {
 
   // Initialize AI services
   useEffect(() => {
-    const initializeAI = async () => {
+    const checkAIAvailability = async () => {
       if (!window.ai) {
-        setError("AI services not available. Please check your setup.");
+        setError("AI services not available. Please check your browser setup.");
         return;
       }
-
-      try {
-        // Check if required tokens exist
-        if (
-          !import.meta.env.VITE_LANGUAGE_DETECTOR_TOKEN ||
-          !import.meta.env.VITE_TRANSLATOR_TOKEN
-        ) {
-          throw new Error("Required API tokens are missing");
-        }
-
-        // No need to initialize separately - the AI services are ready to use
-        setIsAIInitialized(true);
-      } catch (err) {
-        setError(`Failed to initialize AI services: ${err.message}`);
-        console.error("AI initialization error:", err);
-      }
+      setIsAIInitialized(true);
     };
 
-    initializeAI();
+    checkAIAvailability();
   }, []);
 
   const detectLanguage = async (text) => {
     if (!isAIInitialized) {
-      throw new Error("AI services not initialized");
+      throw new Error("AI services not initialized. Please refresh the page.");
     }
 
     try {
       const detector = await window.ai.languageDetector.create();
       const results = await detector.detect(text);
+
       if (!results || !results[0]) {
         throw new Error("No language detected");
       }
@@ -68,7 +54,7 @@ function App() {
     }
 
     if (!isAIInitialized) {
-      setError("AI services not initialized. Please wait or refresh the page.");
+      setError("AI services not initialized. Please refresh the page.");
       return;
     }
 
@@ -96,7 +82,7 @@ function App() {
 
   const handleTranslate = async (messageId) => {
     if (!isAIInitialized) {
-      setError("AI services not initialized. Please wait or refresh the page.");
+      setError("AI services not initialized. Please refresh the page.");
       return;
     }
 
