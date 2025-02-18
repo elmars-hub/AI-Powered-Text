@@ -40,9 +40,17 @@ function ChatBox({
     <div className="h-full overflow-y-auto px-4 py-6">
       {messages.length === 0 ? (
         <div className="h-full flex flex-col items-center justify-center gap-8 px-4">
-          <p className="text-xl dark:text-gray-200 text-gray-600 text-center mt-16">
-            How can I help you today?
-          </p>
+          <div className="text-center mt-16">
+            <h1 className="text-2xl font-bold dark:text-gray-200 text-gray-700 mb-4">
+              How can i help you today?
+            </h1>
+            <p className="text-xl dark:text-gray-300 text-gray-600 mb-2">
+              Type any text to translate its language or summerize it
+            </p>
+            <p className="text-sm dark:text-gray-400 text-gray-500">
+              Best experienced on desktop Chrome or Edge browsers
+            </p>
+          </div>
           <div className="w-full max-w-2xl">
             <input
               type="text"

@@ -15,11 +15,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAIInitialized, setIsAIInitialized] = useState(false);
 
-  // Initialize AI services
   useEffect(() => {
     const checkAIAvailability = async () => {
-      if (!window.ai) {
-        setError("AI services not available. Please check your browser setup.");
+      if (!self.ai) {
+        setError("Please use Chrome or Edge browser");
         return;
       }
       setIsAIInitialized(true);
@@ -29,40 +28,30 @@ function App() {
   }, []);
 
   const detectLanguage = async (text) => {
-    if (!isAIInitialized) {
-      throw new Error("AI services not initialized. Please refresh the page.");
-    }
-
     try {
       const detector = await window.ai.languageDetector.create();
       const results = await detector.detect(text);
-
-      if (!results || !results[0]) {
-        throw new Error("No language detected");
-      }
+      console.log(results);
+      if (!results || !results[0]) return null;
       return results[0].detectedLanguage;
     } catch (error) {
       console.error("Language detection error:", error);
-      throw new Error("Language detection failed: " + error.message);
+      return null;
     }
   };
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) {
-      setError("Please enter some text");
-      return;
-    }
-
-    if (!isAIInitialized) {
-      setError("AI services not initialized. Please refresh the page.");
-      return;
-    }
+    if (!inputText.trim() || !isAIInitialized) return;
 
     setIsLoading(true);
     setError("");
 
     try {
       const detectedLanguage = await detectLanguage(inputText);
+      if (!detectedLanguage) {
+        setError("Could not detect language");
+        return;
+      }
 
       const newMessage = {
         id: Date.now(),
@@ -74,38 +63,41 @@ function App() {
       setMessages((prev) => [...prev, newMessage]);
       setInputText("");
     } catch (err) {
-      setError(err.message);
+      setError("Failed to process message");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleTranslate = async (messageId) => {
-    if (!isAIInitialized) {
-      setError("AI services not initialized. Please refresh the page.");
-      return;
-    }
+    if (!isAIInitialized) return;
 
     const message = messages.find((m) => m.id === messageId);
-    if (!message) return;
+    if (!message || message.language === selectedLanguage) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      const translator = await window.ai.translator.create({
+      const translator = await self.ai.translator.create({
         sourceLanguage: message.language,
         targetLanguage: selectedLanguage,
       });
 
       const translation = await translator.translate(message.text);
-      if (!translation) {
-        throw new Error("Translation failed - no result received");
-      }
+      if (!translation) return;
 
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id === messageId) {
+            // Check for existing translation
+            const hasTranslation = m.processed.some(
+              (p) =>
+                p.type === "translation" &&
+                p.targetLanguage === selectedLanguage
+            );
+            if (hasTranslation) return m;
+
             return {
               ...m,
               processed: [
@@ -122,8 +114,7 @@ function App() {
         })
       );
     } catch (err) {
-      console.error("Translation error:", err);
-      setError("Translation failed: " + err.message);
+      setError("Translation failed");
     } finally {
       setIsLoading(false);
     }
