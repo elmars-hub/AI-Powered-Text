@@ -24,22 +24,15 @@ function App() {
       }
 
       try {
-        // Initialize language detector
-        if (!import.meta.env.VITE_LANGUAGE_DETECTOR_TOKEN) {
-          throw new Error("Language detector token is missing");
+        // Check if required tokens exist
+        if (
+          !import.meta.env.VITE_LANGUAGE_DETECTOR_TOKEN ||
+          !import.meta.env.VITE_TRANSLATOR_TOKEN
+        ) {
+          throw new Error("Required API tokens are missing");
         }
-        await window.ai.languageDetector.init({
-          token: import.meta.env.VITE_LANGUAGE_DETECTOR_TOKEN,
-        });
 
-        // Initialize translator
-        if (!import.meta.env.VITE_TRANSLATOR_TOKEN) {
-          throw new Error("Translator token is missing");
-        }
-        await window.ai.translator.init({
-          token: import.meta.env.VITE_TRANSLATOR_TOKEN,
-        });
-
+        // No need to initialize separately - the AI services are ready to use
         setIsAIInitialized(true);
       } catch (err) {
         setError(`Failed to initialize AI services: ${err.message}`);
