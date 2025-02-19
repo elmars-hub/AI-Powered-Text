@@ -8,8 +8,10 @@ function ChatBox({
   setInputText,
   onSendMessage,
   onTranslate,
+  onSummarize,
   selectedLanguage,
   setSelectedLanguage,
+  isLoading,
 }) {
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -53,6 +55,10 @@ function ChatBox({
       fr: "French",
     };
     return languages[code] || code;
+  };
+
+  const getWordCount = (text) => {
+    return text.trim().split(/\s+/).length;
   };
 
   return (
@@ -123,10 +129,45 @@ function ChatBox({
                 >
                   Translate
                 </button>
+                {getWordCount(message.text) > 150 && (
+                  <button
+                    onClick={() => onSummarize(message.id)}
+                    disabled={isLoading}
+                    className="text-sm text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <span>Summarizing...</span>
+                      </>
+                    ) : (
+                      "Summarize"
+                    )}
+                  </button>
+                )}
               </div>
-              {message.processed.map(
-                (proc, index) =>
-                  proc.type === "translation" && (
+              {message.processed.map((proc, index) => {
+                if (proc.type === "translation") {
+                  return (
                     <div key={index} className="flex flex-col ml-8 mt-2">
                       <div className="flex justify-start">
                         <div className="max-w-[80%] bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
@@ -137,8 +178,23 @@ function ChatBox({
                         Translated to: {getLanguageName(proc.targetLanguage)}
                       </span>
                     </div>
-                  )
-              )}
+                  );
+                } else if (proc.type === "summary") {
+                  return (
+                    <div key={index} className="flex flex-col ml-8 mt-2">
+                      <div className="flex justify-start">
+                        <div className="max-w-[80%] bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
+                          <div className="text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">
+                            Summary:
+                          </div>
+                          {proc.content}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })}
             </div>
           ))}
           <div ref={messagesEndRef} />

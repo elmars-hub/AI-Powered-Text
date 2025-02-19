@@ -16,7 +16,7 @@ function InputText({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t p-4 z-10 dark:bg-dark-backgroundDark">
+    <div className="fixed bottom-0 left-0 right-0 border-t p-4 z-10 dark:bg-dark-backgroundDark px-6 mx-6">
       <div className="max-w-3xl mx-auto flex gap-4">
         <input
           type="text"

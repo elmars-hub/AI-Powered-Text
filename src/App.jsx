@@ -14,6 +14,7 @@ function App() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAIInitialized, setIsAIInitialized] = useState(false);
+  const [isSummarizerAvailable, setIsSummarizerAvailable] = useState(false);
 
   useEffect(() => {
     const checkAIAvailability = async () => {
@@ -21,6 +22,36 @@ function App() {
         setError("Please use Chrome or Edge browser");
         return;
       }
+
+      // Check summarizer availability
+      if ("ai" in self && "summarizer" in self.ai) {
+        try {
+          const summarizerCapabilities =
+            await self.ai.summarizer.capabilities();
+          console.log("Summarizer capabilities:", summarizerCapabilities);
+
+          if (summarizerCapabilities.available === "readily") {
+            setIsSummarizerAvailable(true);
+            console.log("Summarizer is readily available");
+          } else if (summarizerCapabilities.available === "after-download") {
+            setIsSummarizerAvailable(true);
+            console.log("Summarizer will be available after download");
+          } else {
+            console.log(
+              "Summarizer is not available:",
+              summarizerCapabilities.available
+            );
+            setIsSummarizerAvailable(false);
+          }
+        } catch (err) {
+          console.error("Error checking summarizer availability:", err);
+          setIsSummarizerAvailable(false);
+        }
+      } else {
+        console.log("Summarizer API not found in browser");
+        setIsSummarizerAvailable(false);
+      }
+
       setIsAIInitialized(true);
     };
 
@@ -152,6 +183,87 @@ function App() {
     }
   };
 
+  const handleSummarize = async (messageId) => {
+    if (!isAIInitialized) {
+      console.log("AI not initialized");
+      return;
+    }
+
+    if (!isSummarizerAvailable) {
+      setError("Summarizer is not available in your browser");
+      console.log("Summarizer not available");
+      return;
+    }
+
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) {
+      console.log("Message not found:", messageId);
+      return;
+    }
+
+    // Only summarize if text is more than 150 words
+    const wordCount = message.text.trim().split(/\s+/).length;
+    if (wordCount <= 150) {
+      console.log("Text too short for summary:", wordCount, "words");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      console.log("Creating summarizer...");
+      const summarizer = await self.ai.summarizer.create({
+        type: "key-points",
+        format: "markdown",
+        length: "medium",
+        monitor(m) {
+          m.addEventListener("downloadprogress", (e) => {
+            console.log(
+              `Downloading summarizer model: ${Math.round(
+                (e.loaded / e.total) * 100
+              )}%`
+            );
+          });
+        },
+      });
+
+      console.log("Generating summary...");
+      const summary = await summarizer.summarize(message.text);
+      console.log("Summary generated:", summary);
+
+      if (!summary) {
+        throw new Error("No summary was generated");
+      }
+
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === messageId) {
+            const hasSummary = m.processed.some((p) => p.type === "summary");
+            if (hasSummary) return m;
+
+            return {
+              ...m,
+              processed: [
+                ...m.processed,
+                {
+                  type: "summary",
+                  content: summary,
+                },
+              ],
+            };
+          }
+          return m;
+        })
+      );
+    } catch (err) {
+      console.error("Summarization error:", err);
+      setError(`Summarization failed: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div
       className={`${
@@ -167,8 +279,10 @@ function App() {
             setInputText={setInputText}
             onSendMessage={handleSendMessage}
             onTranslate={handleTranslate}
+            onSummarize={handleSummarize}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
+            isLoading={isLoading}
           />
         </div>
       </main>
