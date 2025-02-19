@@ -31,7 +31,7 @@ function App() {
     try {
       const detector = await window.ai.languageDetector.create();
       const results = await detector.detect(text);
-      console.log(results);
+      console.log("Language detection results:", results);
       if (!results || !results[0]) return null;
       return results[0].detectedLanguage;
     } catch (error) {
@@ -72,6 +72,11 @@ function App() {
   const handleTranslate = async (messageId) => {
     if (!isAIInitialized) return;
 
+    if (!("ai" in self && "translator" in self.ai)) {
+      setError("Translation API not supported in this browser");
+      return;
+    }
+
     const message = messages.find((m) => m.id === messageId);
     if (!message || message.language === selectedLanguage) return;
 
@@ -79,18 +84,44 @@ function App() {
     setError("");
 
     try {
+      console.log(
+        `Attempting translation from ${message.language} to ${selectedLanguage}`
+      );
+
+      const translatorCapabilities = await self.ai.translator.capabilities();
+      const availability = await translatorCapabilities.languagePairAvailable(
+        message.language,
+        selectedLanguage
+      );
+
+      if (availability === "no") {
+        setError(
+          `Translation not available for ${message.language} to ${selectedLanguage}`
+        );
+        return;
+      }
+
       const translator = await self.ai.translator.create({
         sourceLanguage: message.language,
         targetLanguage: selectedLanguage,
+        monitor(m) {
+          m.addEventListener("downloadprogress", (e) => {
+            console.log(
+              `Downloading language pack: ${Math.round(
+                (e.loaded / e.total) * 100
+              )}%`
+            );
+          });
+        },
       });
 
       const translation = await translator.translate(message.text);
+      console.log("Translation result:", translation);
       if (!translation) return;
 
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id === messageId) {
-            // Check for existing translation
             const hasTranslation = m.processed.some(
               (p) =>
                 p.type === "translation" &&
@@ -114,7 +145,8 @@ function App() {
         })
       );
     } catch (err) {
-      setError("Translation failed");
+      console.error("Translation error details:", err);
+      setError(`Translation failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,7 @@
 /* eslint-disable react/prop-types */
+import { useEffect, useRef } from "react";
+import { IoSendOutline } from "react-icons/io5";
+
 function ChatBox({
   messages,
   inputText,
@@ -8,6 +11,22 @@ function ChatBox({
   selectedLanguage,
   setSelectedLanguage,
 }) {
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const processedMessagesCount = messages.reduce(
+    (sum, m) => sum + m.processed.length,
+    0
+  );
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, processedMessagesCount]);
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -37,29 +56,36 @@ function ChatBox({
   };
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-6">
+    <div className="h-full overflow-y-auto px-4 py-6" ref={chatContainerRef}>
       {messages.length === 0 ? (
         <div className="h-full flex flex-col items-center justify-center gap-8 px-4">
           <div className="text-center mt-16">
             <h1 className="text-2xl font-bold dark:text-gray-200 text-gray-700 mb-4">
-              How can i help you today?
+              How can I help you today?
             </h1>
             <p className="text-xl dark:text-gray-300 text-gray-600 mb-2">
-              Type any text to translate its language or summerize it
+              Type any text to detect its language and translate it
             </p>
             <p className="text-sm dark:text-gray-400 text-gray-500">
               Best experienced on desktop Chrome or Edge browsers
             </p>
           </div>
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-2xl flex gap-2">
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              className="w-full px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <button
+              onClick={() => onSendMessage(inputText)}
+              disabled={!inputText.trim()}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <IoSendOutline />
+            </button>
           </div>
         </div>
       ) : (
@@ -81,14 +107,19 @@ function ChatBox({
                   className="text-sm px-2 py-1 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {languages.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
+                    <option
+                      key={lang.code}
+                      value={lang.code}
+                      disabled={lang.code === message.language}
+                    >
                       {lang.name}
                     </option>
                   ))}
                 </select>
                 <button
                   onClick={() => onTranslate(message.id)}
-                  className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  disabled={selectedLanguage === message.language}
+                  className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Translate
                 </button>
@@ -110,6 +141,7 @@ function ChatBox({
               )}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
       )}
     </div>
