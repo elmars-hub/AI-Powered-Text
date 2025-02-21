@@ -66,13 +66,7 @@ function MessageControls({ message }) {
       {getWordCount(message.text) > 150 && message.language === "en" && (
         <button
           onClick={() => handleSummarize(message.id)}
-          disabled={
-            isSummarizing ||
-            apiStatus === "no" ||
-            apiStatus === "unsupported" ||
-            apiStatus === "error" ||
-            apiStatus === "checking"
-          }
+          
           className="text-sm text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full transition-all hover:shadow-md"
           aria-label={isSummarizing ? "Summarizing..." : "Summarize message"}
         >
