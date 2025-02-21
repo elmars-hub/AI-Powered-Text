@@ -10,7 +10,7 @@ export default {
       colors: {
         light: {
           backgroundLight: "#fffbff",
-          primaryLight: "#ffdbca",
+          primaryLight: "#fef1ec",
           outline: "#85736b",
         },
         dark: {
@@ -18,6 +18,30 @@ export default {
           primaryDark: "#783200",
           secondaryContainer: "#5c4032",
           outlineDark: "#52443d",
+        },
+      },
+      animation: {
+        "rotate-light": "rotate-right 0.3s ease-in-out forwards",
+        "rotate-dark": "rotate-left 0.3s ease-in-out forwards",
+        "fade-in": "fadeIn 0.5s ease-in-out",
+        "fade-out": "fadeOut 0.5s ease-in-out",
+      },
+      keyframes: {
+        "rotate-right": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(80deg)" },
+        },
+        "rotate-left": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(-10deg)" },
+        },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        fadeOut: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
         },
       },
     },

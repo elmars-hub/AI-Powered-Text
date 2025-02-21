@@ -1,25 +1,27 @@
-/* eslint-disable react/prop-types */
-import { IoSunnyOutline } from "react-icons/io5";
-import { IoMoonOutline } from "react-icons/io5";
+import { IoSunnyOutline, IoMoonOutline } from "react-icons/io5";
+import { useAppContext } from "../context/AppContext";
 
-function Header({ darkMode, setDarkMode }) {
-  function handleMode() {
-    setDarkMode((d) => !d);
-  }
+function Header() {
+  const { darkMode, toggleDarkMode } = useAppContext();
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 z-10 dark:bg-dark-backgroundDark bg-light-backgroundLight">
+    <div className="fixed top-0 left-0 right-0 h-16 z-10 dark:bg-dark-backgroundDark bg-light-primaryLight shadow-md">
       <nav className="flex justify-between items-center px-6 py-2">
         <h2 className="dark:text-stone-300 font-bold text-3xl">ChatHNG</h2>
 
-        <div
+        <button
           className="p-3 rounded-full hover:dark:bg-outlineDark cursor-pointer"
-          onClick={handleMode}
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          <span className="text-2xl dark:text-stone-100">
-            {darkMode ? <IoSunnyOutline /> : <IoMoonOutline />}
+          <span className="text-base dark:text-stone-100 transition-all duration-300">
+            {darkMode ? (
+              <IoSunnyOutline className="animate-rotate-light" />
+            ) : (
+              <IoMoonOutline className="animate-rotate-dark rotate-45" />
+            )}
           </span>
-        </div>
+        </button>
       </nav>
     </div>
   );

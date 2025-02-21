@@ -1,18 +1,26 @@
-/* eslint-disable react/prop-types */
 import { useEffect, useRef } from "react";
-import { IoSendOutline } from "react-icons/io5";
+import { IoSendOutline, IoTrashOutline } from "react-icons/io5";
+import { useAppContext } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
-function ChatBox({
-  messages,
-  inputText,
-  setInputText,
-  onSendMessage,
-  onTranslate,
-  onSummarize,
-  selectedLanguage,
-  setSelectedLanguage,
-  isLoading,
-}) {
+function ChatBox() {
+  const {
+    messages,
+    inputText,
+    setInputText,
+    handleSendMessage,
+    handleTranslate,
+    handleSummarize,
+    selectedLanguage,
+    setSelectedLanguage,
+    languages,
+    getLanguageName,
+    isTranslating,
+    isSummarizing,
+    apiStatus,
+    clearChat,
+  } = useAppContext();
+
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
@@ -32,29 +40,8 @@ function ChatBox({
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSendMessage(inputText);
+      handleSendMessage();
     }
-  };
-
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "pt", name: "Portuguese" },
-    { code: "es", name: "Spanish" },
-    { code: "ru", name: "Russian" },
-    { code: "tr", name: "Turkish" },
-    { code: "fr", name: "French" },
-  ];
-
-  const getLanguageName = (code) => {
-    const languages = {
-      en: "English",
-      pt: "Portuguese",
-      es: "Spanish",
-      ru: "Russian",
-      tr: "Turkish",
-      fr: "French",
-    };
-    return languages[code] || code;
   };
 
   const getWordCount = (text) => {
@@ -86,7 +73,7 @@ function ChatBox({
               className="flex-1 px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={() => onSendMessage(inputText)}
+              onClick={handleSendMessage}
               disabled={!inputText.trim()}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -96,6 +83,15 @@ function ChatBox({
         </div>
       ) : (
         <div className="space-y-6">
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={clearChat}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 focus:outline-none"
+            >
+              <IoTrashOutline className="text-lg" />
+              <span>Clear Chat</span>
+            </button>
+          </div>
           {messages.map((message) => (
             <div key={message.id} className="flex flex-col space-y-2">
               <div className="flex justify-start">
@@ -123,40 +119,38 @@ function ChatBox({
                   ))}
                 </select>
                 <button
-                  onClick={() => onTranslate(message.id)}
-                  disabled={selectedLanguage === message.language}
-                  className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleTranslate(message.id)}
+                  disabled={
+                    selectedLanguage === message.language ||
+                    isTranslating ||
+                    apiStatus === "checking"
+                  }
+                  className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
-                  Translate
+                  {isTranslating ? (
+                    <>
+                      <LoadingSpinner />
+                      <span>Translating...</span>
+                    </>
+                  ) : (
+                    "Translate"
+                  )}
                 </button>
                 {getWordCount(message.text) > 150 && (
                   <button
-                    onClick={() => onSummarize(message.id)}
-                    disabled={isLoading}
+                    onClick={() => handleSummarize(message.id)}
+                    disabled={
+                      isSummarizing ||
+                      apiStatus === "no" ||
+                      apiStatus === "unsupported" ||
+                      apiStatus === "error" ||
+                      apiStatus === "checking"
+                    }
                     className="text-sm text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
-                    {isLoading ? (
+                    {isSummarizing ? (
                       <>
-                        <svg
-                          className="animate-spin h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                        <LoadingSpinner />
                         <span>Summarizing...</span>
                       </>
                     ) : (
