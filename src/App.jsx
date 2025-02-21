@@ -10,7 +10,7 @@ function App() {
     <div
       className={`${
         darkMode ? "dark animate-fade-in" : "fade-out"
-      } dark:bg-dark-backgroundDark bg-light-backgroundLight min-h-screen flex flex-col`}
+      } dark:bg-dark-backgroundDark bg-light-primaryLight min-h-screen flex flex-col`}
     >
       <Header />
       <main className="flex-1 overflow-hidden mt-16 mb-20">
