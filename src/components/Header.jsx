@@ -6,19 +6,19 @@ function Header() {
   const { darkMode, toggleDarkMode } = useAppContext();
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 z-10 dark:bg-dark-backgroundDark bg-light-primaryLight shadow-md">
-      <nav className="flex justify-between items-center px-6 py-2">
-        <div className="flex items-center space-x-2">
-          <img src={Logo} alt="logo" className="h-10 w-10" />
-          <h2 className="dark:text-stone-300 font-bold text-3xl">ChatHNG</h2>
+    <div className="fixed top-0 left-0 right-0 h-16 z-10 dark:bg-dark-backgroundDark bg-light-primaryLight shadow-lg backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90">
+      <nav className="max-w-7xl mx-auto flex justify-between items-center h-full px-6">
+        <div className="flex items-center space-x-3 transition-transform hover:scale-105">
+          <img src={Logo} alt="logo" className="h-10 w-10 rounded-lg shadow-md" />
+          <h2 className="dark:text-stone-300 font-bold text-3xl bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">ChatHNG</h2>
         </div>
 
         <button
-          className="p-3 rounded-full hover:dark:bg-outlineDark cursor-pointer"
+          className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-dark-secondaryContainer transition-all duration-300 transform hover:scale-110"
           onClick={toggleDarkMode}
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          <span className="text-lg dark:text-stone-100 transition-all duration-300">
+          <span className="text-xl dark:text-stone-100">
             {darkMode ? (
               <IoSunnyOutline className="animate-rotate-light" />
             ) : (

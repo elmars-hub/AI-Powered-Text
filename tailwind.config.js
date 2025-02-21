@@ -25,6 +25,7 @@ export default {
         "rotate-dark": "rotate-left 0.3s ease-in-out forwards",
         "fade-in": "fadeIn 0.5s ease-in-out",
         "fade-out": "fadeOut 0.5s ease-in-out",
+        "theme-fade": "themeFade 0.3s ease-in-out",
       },
       keyframes: {
         "rotate-right": {
@@ -43,6 +44,19 @@ export default {
           "0%": { opacity: "1" },
           "100%": { opacity: "0" },
         },
+        themeFade: {
+          "0%": { opacity: "0.5" },
+          "100%": { opacity: "1" },
+        },
+      },
+      transitionProperty: {
+        'theme': 'background-color, border-color, color, fill, stroke, opacity, box-shadow, transform',
+      },
+      transitionDuration: {
+        '300': '300ms',
+      },
+      transitionTimingFunction: {
+        'theme': 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
     },
   },

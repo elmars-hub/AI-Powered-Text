@@ -9,23 +9,25 @@ function App() {
   return (
     <div
       className={`${
-        darkMode ? "dark animate-fade-in" : "fade-out"
-      } dark:bg-dark-backgroundDark bg-light-primaryLight min-h-screen flex flex-col`}
+        darkMode ? "dark" : ""
+      } min-h-screen flex flex-col transition-theme duration-300 ease-theme animate-theme-fade`}
     >
-      <Header />
-      <main className="flex-1 overflow-hidden mt-16 mb-20">
-        <div className="h-full max-w-3xl mx-auto">
-          <ChatBox />
-        </div>
-      </main>
-      {messages.length > 0 && <InputText />}
-      {error && (
-        <div className="fixed bottom-24 left-0 right-0 flex justify-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg">
-            {error}
+      <div className="dark:bg-dark-backgroundDark bg-light-primaryLight min-h-screen flex flex-col transition-theme duration-300 ease-theme">
+        <Header />
+        <main className="flex-1 overflow-hidden mt-16 mb-20">
+          <div className="h-full max-w-3xl mx-auto">
+            <ChatBox />
           </div>
-        </div>
-      )}
+        </main>
+        {messages.length > 0 && <InputText />}
+        {error && (
+          <div className="fixed bottom-24 left-0 right-0 flex justify-center">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg animate-fade-in">
+              {error}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
